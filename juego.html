@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Juego de Números</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #1c1c1c;
+            color: #ffffff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        .container {
+            background-color: #262626;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.5);
+            text-align: center;
+            max-width: 300px;
+            width: 100%;
+        }
+
+        h2 {
+            margin-bottom: 20px;
+            color: #aaaaaa;
+        }
+
+        input[type="text"],
+        input[type="number"] {
+            width: calc(100% - 20px); /* Consider padding */
+            padding: 10px;
+            margin: 10px 0;
+            border: none;
+            border-bottom: 2px solid #666666;
+            background-color: transparent;
+            color: #ffffff;
+            font-size: 16px;
+            outline: none;
+            text-align: center;
+        }
+
+        input[type="text"]::placeholder,
+        input[type="number"]::placeholder {
+            color: #777777;
+        }
+
+        button {
+            padding: 10px 20px;
+            margin: 10px 0;
+            border: none;
+            border-radius: 20px;
+            background-color: #b28efb;
+            color: #1c1c1c;
+            cursor: pointer;
+            font-size: 16px;
+            width: 100%;
+        }
+
+        button:hover {
+            background-color: #a472f7;
+        }
+
+        p, pre {
+            margin-top: 10px;
+            color: #cccccc;
+            text-align: center;
+        }
+
+        .buttons {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2 id="turno">Jugador 1</h2>
+        <div>
+            <input type="text" id="jugador" placeholder="Jugador">
+        </div>
+        <div>
+            <input type="number" id="eleccion" placeholder="Número">
+        </div>
+        <p id="validation"></p>
+        <div class="buttons">
+            <button id="btnSiguiente">Siguiente</button>
+            <button id="btnTerminar">Terminar</button>
+        </div>
+        <p id="result_medio"></p>
+        <p id="result_final"></p>
+        <p id="gana"></p>
+        <pre id="elegidos"></pre>
+    </div>
+    <script>
+        let jugadores = [];
+        let numeros = [];
+        let diferencia = 101;
+        let contador = 1;
+
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('btnSiguiente').addEventListener('click', verificar);
+            document.getElementById('btnTerminar').addEventListener('click', ganadores);
+        });
+
+        function verificar() {
+            const jugador = document.getElementById('jugador').value.trim();
+            const eleccion = document.getElementById('eleccion').value.trim();
+            const validation = document.getElementById('validation');
+
+            try {
+                const num = parseInt(eleccion, 10);
+                if (num < 0 || num > 100) {
+                    validation.textContent = "Número no comprendido entre 0 y 100";
+                } else if (!jugador) {
+                    validation.textContent = "Nombre no válido";
+                } else {
+                    contador++;
+                    document.getElementById('turno').textContent = "Jugador " + contador;
+                    validation.textContent = "Todo correcto";
+                    jugadores.push(jugador);
+                    numeros.push(num);
+                    document.getElementById('jugador').value = "";
+                    document.getElementById('eleccion').value = "";
+                }
+            } catch (e) {
+                validation.textContent = "Por favor, introduce un número válido";
+            }
+        }
+
+        function ganadores() {
+            const media = numeros.reduce((acc, num) => acc + num, 0) / numeros.length || 0;
+            const resultado = media * 0.8;
+            document.getElementById('result_medio').textContent = "La media de los jugadores: " + media.toFixed(1);
+            document.getElementById('result_final').textContent = "El resultado final es: " + resultado.toFixed(1);
+            let ganador = "";
+            let mejorDiferencia = diferencia;
+
+            jugadores.forEach((jugador, i) => {
+                const num = numeros[i];
+                const nuevaDiferencia = Math.abs(num - resultado);
+
+                if (nuevaDiferencia === mejorDiferencia) {
+                    ganador += " " + jugador;
+                }
+                if (nuevaDiferencia < mejorDiferencia) {
+                    mejorDiferencia = nuevaDiferencia;
+                    ganador = jugador;
+                }
+            });
+
+            if (ganador.trim().includes(" ")) {
+                document.getElementById('gana').textContent = "Los ganadores son: " + ganador.trim();
+            } else {
+                document.getElementById('gana').textContent = "El ganador es: " + ganador;
+            }
+
+            let escogidos = "";
+            jugadores.forEach((jugador, i) => {
+                escogidos += `(${jugador}, ${numeros[i]})\n`;
+            });
+
+            document.getElementById('elegidos').textContent = escogidos;
+        }
+
+        function reinicio() {
+            jugadores = [];
+            numeros = [];
+            diferencia = 101;
+            contador = 1;
+
+            document.getElementById('jugador').value = "";
+            document.getElementById('eleccion').value = "";
+            document.getElementById('validation').textContent = "";
+            document.getElementById('result_medio').textContent = "";
+            document.getElementById('result_final').textContent = "";
+            document.getElementById('gana').textContent = "";
+            document.getElementById('elegidos').textContent = "";
+            document.getElementById('turno').textContent = "Jugador 1";
+        }
+    </script>
+</body>
+</html>
